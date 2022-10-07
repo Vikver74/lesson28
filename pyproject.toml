@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "avito"
+version = "0.1.0"
+description = ""
+authors = ["y"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Django = "^4.1.2"
+psycopg2 = "^2.9.3"
+Pillow = "^9.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

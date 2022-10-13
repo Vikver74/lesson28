@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
@@ -8,8 +7,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 import json
 
+from rest_framework import generics
+
 from ads.models import Ad, Category
-from avito import settings
+from ads.serializers import AdListSerializer
 from users.models import User
 
 
@@ -21,29 +22,30 @@ def index(request):
     )
 
 
-class AdListView(ListView):
-    model = Ad
+class AdListAPIView(generics.ListAPIView):
+    serializer_class = AdListSerializer
+    queryset = Ad.objects.all().order_by('-price')
 
     def get(self, request, *args, **kwargs):
-        super().get(request, *args, **kwargs)
-        page_number = request.GET.get('page', 1)
-        self.object_list = self.object_list.select_related('author').select_related('category').order_by('-price')
-        paginator = Paginator(object_list=self.object_list, per_page=settings.TOTAL_ON_PAGE)
-        page_obj = paginator.get_page(page_number)
-        result = []
-        for item in page_obj:
-            result.append({
-                "id": item.id,
-                "name": item.name,
-                "author_id": item.author.id,
-                "author": item.author.first_name,
-                "price": item.price,
-                "description": item.description,
-                "is_published": item.is_published,
-                "category_id": item.category.id,
-                "image": item.image.url,
-            })
-        return JsonResponse({"items": result, "total": self.object_list.count(), "num_pages": page_obj.number}, safe=False, json_dumps_params={'ensure_ascii': False})
+        category = request.GET.getlist('cat')
+        if category:
+            self.queryset = self.queryset.filter(category__in=category)
+        text = request.GET.get('text')
+        if text:
+            self.queryset = self.queryset.filter(name__icontains=text)
+
+        location = request.GET.get('location')
+        if location:
+            self.queryset = self.queryset.filter(author__location__name__icontains=location)
+
+        price_from = request.GET.get('price_from')
+        price_to = request.GET.get('price_to')
+        if price_from:
+            self.queryset = self.queryset.filter(price__gte=price_from)
+        if price_to:
+            self.queryset = self.queryset.filter(price__lte=price_to)
+
+        return super().get(self, *args, **kwargs)
 
 
 class AdDetailView(DetailView):

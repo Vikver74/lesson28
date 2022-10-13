@@ -8,7 +8,7 @@ class Location(models.Model):
     lng = models.DecimalField(max_digits=10, decimal_places=8, verbose_name='Долгота', null=True)
 
     def __str__(self):
-        return self.name
+        return [self.name, self.lat, self.lng]
 
     class Meta:
         verbose_name = 'Местоположение'

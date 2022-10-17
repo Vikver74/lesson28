@@ -3,7 +3,7 @@ from users.models import User, Location
 from rest_framework import generics, viewsets
 
 from users.serializers import UserSerializer, UserCreateSerializer, LocationSerializer, \
-    UserUpdateSerializer, UserDeleteSerializer
+    UserUpdateSerializer, UserDeleteSerializer, JwtTokenSerializer
 
 
 class UserListAPIView(generics.ListAPIView):
@@ -34,3 +34,8 @@ class UserDeleteAPIView(generics.DestroyAPIView):
 class LocationViewSet(viewsets.ModelViewSet):
     serializer_class = LocationSerializer
     queryset = Location.objects.all()
+
+
+class JwtTokenCreateView(generics.CreateAPIView):
+    serializer_class = JwtTokenSerializer
+    queryset = User.objects.all()

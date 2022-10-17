@@ -1,7 +1,7 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# Create your models here.
 class Location(models.Model):
     name = models.CharField(max_length=60, verbose_name='Наименование')
     lat = models.DecimalField(max_digits=10, decimal_places=8, verbose_name='Широта', null=True)
@@ -15,19 +15,15 @@ class Location(models.Model):
         verbose_name_plural = 'Местоположения'
 
 
-class User(models.Model):
+class User(AbstractUser):
     ROLE = [
         ('member', 'Пользователь'),
         ('moderator', 'Модератор'),
         ('admin', 'Администратор')
     ]
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=25)
-    username = models.CharField(max_length=20)
-    password = models.CharField(max_length=20)
     role = models.CharField(max_length=10, default='member', choices=ROLE)
-    age = models.PositiveSmallIntegerField()
-    location = models.ManyToManyField(Location)
+    age = models.PositiveSmallIntegerField(null=True)
+    location = models.ManyToManyField(Location, related_name='users')
 
     def __str__(self):
         return self.username

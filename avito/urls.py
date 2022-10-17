@@ -30,6 +30,8 @@ urlpatterns = [
     path('', index, name='index_ads'),
     path('ad/', include('ads.urls.ad_urls')),
     path('cat/', include('ads.urls.cat_urls')),
+    path('selection/', include('ads.urls.selection_urls')),
+
     path('users/', include('users.urls')),
 ]
 

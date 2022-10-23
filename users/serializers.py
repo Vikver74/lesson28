@@ -35,8 +35,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data)
 
         for loc in self.location_:
-            location_, _ = Location.objects.get_or_create(name=loc.get('name'), lat=loc.get('lat'), lng=loc.get('lng'))
-            # location_, _ = Location.objects.get_or_create(name=loc)
+            # location_, _ = Location.objects.get_or_create(name=loc.get('name'), lat=loc.get('lat'), lng=loc.get('lng'))
+            location_, _ = Location.objects.get_or_create(name=loc)
             user.location.add(location_)
 
         return user

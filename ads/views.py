@@ -2,8 +2,7 @@ from django.http import JsonResponse
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-import json
+from django.views.generic import UpdateView
 
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -12,7 +11,8 @@ from ads.models import Ad, Category, SelectionAd
 from ads.permissions import IsOwnerOrDeny, IsOwnerOrAdminOrModerator
 from ads.serializers import AdListSerializer, SelectionAdListSerializer, SelectionAdCreateSerializer, \
     SelectionAdDetailSerializer, SelectionAdDeleteSerializer, SelectionAdUpdateSerializer, AdCreateSerializer, \
-    AdUpdateSerializer, AdDeleteSerializer
+    AdUpdateSerializer, AdDeleteSerializer, CategoryCreateSerializer, CategoryUpdateSerializer, \
+    CategoryDeleteSerializer, CategoryListSerializer, CategoryDetailSerializer
 
 
 def index(request):
@@ -98,73 +98,29 @@ class AdUploadImage(UpdateView):
         }, safe=False, json_dumps_params={'ensure_ascii': False})
 
 
-class CategoryListView(ListView):
-    model = Category
-
-    def get(self, request, *args, **kwargs):
-        super().get(request, *args, **kwargs)
-        self.object_list = self.object_list.order_by('name')
-        result = []
-        for item in self.object_list:
-            result.append({
-                "id": item.id,
-                "name": item.name
-            })
-
-        return JsonResponse(result, safe=False, json_dumps_params={'ensure_ascii': False})
+class CategoryListAPIView(generics.ListAPIView):
+    serializer_class = CategoryListSerializer
+    queryset = Category.objects.all()
 
 
-class CategoryDetailView(DetailView):
-    model = Category
-
-    def get(self, request, *args, **kwargs):
-        super().get(request, *args, **kwargs)
-        return JsonResponse({
-            "id": self.object.id,
-            "name": self.object.name,
-        }, safe=False, json_dumps_params={'ensure_ascii': False})
+class CategoryDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = CategoryDetailSerializer
+    queryset = Category.objects.all()
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CategoryCreateView(CreateView):
-    model = Category
-    fields = ['name']
-
-    def post(self, request, *args, **kwargs):
-        data = json.loads(request.body)
-        category = Category.objects.create(name=data['name'])
-
-        return JsonResponse({
-            "id": category.pk,
-            "name": category.name,
-        }, status=201, safe=False)
+class CategoryUpdateAPIView(generics.UpdateAPIView):
+    serializer_class = CategoryUpdateSerializer
+    queryset = Category.objects.all()
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CategoryUpdateView(UpdateView):
-    model = Category
-    fields = ['name']
-
-    def post(self, request, *args, **kwargs):
-        super().post(request, *args, **kwargs)
-        data = json.loads(request.body)
-        self.object.name = data['name']
-        self.object.save()
-
-        return JsonResponse({
-            "id": self.object.pk,
-            "name": self.object.name,
-        }, status=200, safe=False)
+class CategoryCreateAPIView(generics.CreateAPIView):
+    serializer_class = CategoryCreateSerializer
+    queryset = Category.objects.all()
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CategoryDeleteView(DeleteView):
-    model = Category
-    success_url = '/'
-
-    def delete(self, request, *args, **kwargs):
-        super().delete(request, *args, **kwargs)
-        return JsonResponse({"status": "ok"}, status=204, safe=False)
+class CategoryDeleteAPIView(generics.DestroyAPIView):
+    serializer_class = CategoryDeleteSerializer
+    queryset = Category.objects.all()
 
 
 class SelectionAdListView(generics.ListAPIView):
